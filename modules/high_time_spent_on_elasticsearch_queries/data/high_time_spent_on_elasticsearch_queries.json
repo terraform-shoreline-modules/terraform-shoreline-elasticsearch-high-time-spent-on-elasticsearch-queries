@@ -1,0 +1,174 @@
+{
+  "name": "high_time_spent_on_elasticsearch_queries",
+  "description": "This incident type refers to an elevated time spent on processing queries in an Elasticsearch cluster. It could be an indication of potential resource bottlenecks or a need to optimize the queries. This incident requires investigation and resolution to prevent further issues and ensure a smooth functioning Elasticsearch cluster.",
+  "params": [
+    {
+      "name": "QUERY_TO_CACHE",
+      "value": ""
+    },
+    {
+      "name": "ELASTICSEARCH_HOST",
+      "value": ""
+    },
+    {
+      "name": "ELASTICSEARCH_PORT",
+      "value": ""
+    },
+    {
+      "name": "PATH_TO_ELASTICSEARCH_CONFIG_FILE",
+      "value": ""
+    },
+    {
+      "name": "NODE_MEMORY_SIZE_IN_GB",
+      "value": ""
+    },
+    {
+      "name": "NODE_CPU_CORES",
+      "value": ""
+    },
+    {
+      "name": "INDEX_NAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## High time spent on Elasticsearch queries\nThis incident type refers to an elevated time spent on processing queries in an Elasticsearch cluster. It could be an indication of potential resource bottlenecks or a need to optimize the queries. This incident requires investigation and resolution to prevent further issues and ensure a smooth functioning Elasticsearch cluster."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Elasticsearch cluster health"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -X GET ${ELASTICSEARCH_HOST}:9200/_cluster/health?pretty`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Elasticsearch indices"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -X GET ${ELASTICSEARCH_HOST}:9200/_cat/indices?v`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Elasticsearch node stats"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -X GET ${ELASTICSEARCH_HOST}:9200/_nodes/stats?pretty`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Elasticsearch search and query latency"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -X GET ${ELASTICSEARCH_HOST}:9200/_nodes/stats/indices/search?pretty`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Elasticsearch search and query throughput"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -X GET ${ELASTICSEARCH_HOST}:9200/_nodes/stats/indices/search?pretty`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Elasticsearch query performance"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -XGET ${ELASTICSEARCH_HOST}:9200/_cat/indices/${INDEX_NAME}?v&s=query_total`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Elasticsearch query time"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -XGET ${ELASTICSEARCH_HOST}:9200/_cat/indices/${INDEX_NAME}?v&s=query_time`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Insufficient resources allocated to Elasticsearch cluster."
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_check_resource_usage()"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Enable query caching for frequently executed queries"
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_cache_enable($ELASTICSEARCH_HOST)"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Fine-tune the Elasticsearch cluster configuration settings."
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_heap_cpu_config($PATH_TO_ELASTICSEARCH_CONFIG_FILE, $NODE_MEMORY_SIZE_IN_GB, $NODE_CPU_CORES)"
+    }
+  ]
+}
